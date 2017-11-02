@@ -31,8 +31,19 @@ services:
      - SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL=zookeeper:2181
      - SCHEMA_REGISTRY_HOST_NAME=schema-registry
      - SCHEMA_REGISTRY_LISTENERS=http://schema-registry:8081
+     - SCHEMA_REGISTRY_ACCESS_CONTROL_ALLOW_METHODS=GET,POST,PUT,OPTIONS
+     - SCHEMA_REGISTRY_ACCESS_CONTROL_ALLOW_ORIGIN=*
     links:
      - zookeeper
+  schema-registry-ui:
+    image: landoop/schema-registry-ui
+    ports:
+     - 8000:8000
+    environment:
+     - SCHEMAREGISTRY_URL=http://schema-registry:8081
+     - PROXY=true
+    links:
+     - schema-registry
   connect:
     image: debezium/connect:${DEBEZIUM_VERSION}
     ports:
