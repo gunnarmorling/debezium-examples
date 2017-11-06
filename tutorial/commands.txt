@@ -11,9 +11,10 @@ docker-compose exec schema-registry /usr/bin/kafka-avro-console-consumer \
 
 docker-compose exec postgres bash -c 'psql -U $POSTGRES_USER $POSTGRES_DB -c "select * from dbserver1_inventory_customers"'
 
+cat jdbc-sink.json | http POST http://localhost:8083/connectors/
+
 http localhost:8083/connectors/inventory-connector/status
 
 docker-compose exec postgres bash -c 'psql -U $POSTGRES_USER $POSTGRES_DB -c "select * from customers"'
 
-
-curl -X GET http://localhost:8081/subjects/dbserver1_inventory_customers-value/versions
+http http://localhost:8081/subjects/dbserver1_inventory_Hike-value/versions
