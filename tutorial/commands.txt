@@ -1,18 +1,13 @@
 docker-compose exec kafka /kafka/bin/kafka-topics.sh --list --zookeeper zookeeper:2181
 
-docker-compose exec schema-registry /usr/bin/kafka-avro-console-consumer \
-    --bootstrap-server kafka:9092 \
-    --from-beginning \
-    --property print.key=true \
-    --property schema.registry.url=http://schema-registry:8081 \
-    --topic dbserver1_inventory_Hike
+cat register-mysql.json | http POST http://localhost:8083/connectors/
 
 docker-compose exec schema-registry /usr/bin/kafka-avro-console-consumer \
     --bootstrap-server kafka:9092 \
     --from-beginning \
     --property print.key=true \
     --property schema.registry.url=http://schema-registry:8081 \
-    --topic dbserver1_inventory_customers
+    --topic dbserver1_inventory_Hike
 
 docker-compose exec postgres bash -c 'psql -U $POSTGRES_USER $POSTGRES_DB -c "select * from dbserver1_inventory_customers"'
 
