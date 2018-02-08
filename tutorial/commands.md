@@ -25,7 +25,7 @@
 # Register source connector (JSON)
 
 - cat register-hiking-connector-json.json | http POST http://localhost:8084/connectors/
-- docker-compose exec kafka /kafka/bin/kafka-console-consumer.sh --bootstrap-server kafka:9092 --from-beginning --property print.key=true --topic dbserver1_inventory_Hike
+- docker-compose exec kafka /kafka/bin/kafka-console-consumer.sh --bootstrap-server kafka:9092 --from-beginning --property print.key=true --topic dbserver1_inventory_Hike_json
 
 
 
