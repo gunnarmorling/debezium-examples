@@ -1,5 +1,5 @@
 {
-    "name": "inventory-connector",
+    "name": "hiking-connector",
     "config": {
         "connector.class": "io.debezium.connector.mysql.MySqlConnector",
         "tasks.max": "1",
