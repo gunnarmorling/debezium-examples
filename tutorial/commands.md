@@ -15,6 +15,7 @@
 - cat register-hiking-connector.json | http POST http://localhost:8083/connectors/
 - http localhost:8083/connectors/hiking-connector/status
 - docker-compose exec schema-registry /usr/bin/kafka-avro-console-consumer --bootstrap-server kafka:9092 --from-beginning --property print.key=true --property schema.registry.url=http://schema-registry:8081 --topic dbserver1_inventory_Hike
+- http http://localhost:8081/subjects/dbserver1_inventory_Hike-value/versions/1 | jq '.schema | fromjson'
 
 # Register sink connector
 
@@ -27,13 +28,11 @@
 - cat register-hiking-connector-json.json | http POST http://localhost:8084/connectors/
 - docker-compose exec kafka /kafka/bin/kafka-console-consumer.sh --bootstrap-server kafka:9092 --from-beginning --property print.key=true --topic dbserver1_inventory_Hike_json
 
+# Start Swarm app
 
-
-
-# json
+- mvn wildfly-swarm:run -Dswarm.http.port=8079
 
 # Misc.
 
-docker-compose exec kafka /kafka/bin/kafka-topics.sh --list --zookeeper zookeeper:2181
-docker-compose exec mysql bash -c 'mysql -u $MYSQL_USER -p$MYSQL_PASSWORD inventory'
-http http://localhost:8081/subjects/dbserver1_inventory_Hike-value/versions
+- docker-compose exec kafka /kafka/bin/kafka-topics.sh --list --zookeeper zookeeper:2181
+- docker-compose exec mysql bash -c 'mysql -u $MYSQL_USER -p$MYSQL_PASSWORD inventory'
