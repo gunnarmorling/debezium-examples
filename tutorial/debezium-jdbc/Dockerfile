@@ -1,4 +1,4 @@
-FROM debezium/connect:0.6
+FROM debezium/connect:0.7
 
 # Deploy PostgreSQL JDBC Driver
 COPY postgresql-42.1.4.jar /kafka/libs

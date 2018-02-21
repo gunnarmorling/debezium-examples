@@ -14,6 +14,7 @@ services:
      - zookeeper
     environment:
      - ZOOKEEPER_CONNECT=zookeeper:2181
+     - ADVERTISED_HOST_NAME=${DOCKER_HOST_NAME}
   mysql:
     image: debezium/example-mysql:${DEBEZIUM_VERSION}
     ports:

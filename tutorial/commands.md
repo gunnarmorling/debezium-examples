@@ -1,14 +1,17 @@
+# Prepare Kafka etc.
+
+- export DOCKER_HOST_NAME=`ipconfig getifaddr en0`
+- export DEBEZIUM_VERSION=0.7
+- docker ps -a
+- docker-compose up
+
 # Prepare WF
 
+- mvn clean install -DskipTests=true
 - ./prepare.sh
 - ./target/wildfly-10.1.0.Final/bin/standalone.sh
 - mvn wildfly:deploy -DskipTests=true
 - Go to http://localhost:8080/hibernate-ogm-hiking-demo-1.0-SNAPSHOT/hikes.html
-
-# Prepare Kafka etc.
-
-- docker ps -a
-- docker-compose up
 
 # Register source connector (Avro)
 
@@ -19,9 +22,18 @@
 
 # Register sink connector
 
+- Back to slides - mention SMT
+
 - cat jdbc-sink.json | http POST http://localhost:8083/connectors/
 - http localhost:8083/connectors/
 - docker-compose exec postgres bash -c 'psql -U $POSTGRES_USER $POSTGRES_DB -c "select * from \"dbserver1_inventory_Hike\""'
+
+# Stop Kafka Connect
+
+- docker stop tutorial_connect_1
+- Change some data
+- docker-compose up -d
+- Show PG again as it catches up
 
 # Register source connector (JSON)
 
