@@ -43,7 +43,7 @@
 # Start Swarm app
 
 - mvn wildfly-swarm:run -Dswarm.http.port=8079
-
+- Open in other browser: http://localhost:8079/
 # Misc.
 
 - docker-compose exec kafka /kafka/bin/kafka-topics.sh --list --zookeeper zookeeper:2181
