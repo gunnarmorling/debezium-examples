@@ -14,7 +14,8 @@
 
             ws.onmessage = function (evt) {
                 var msg = evt.data;
-                alert( msg );
+                var contents = document.getElementById("contents");
+                contents.innerHTML = contents.innerHTML + msg + "<br/>";
             };
 
             ws.onclose = function() { 
@@ -24,6 +25,7 @@
     </head>
 
     <body>
-        <p>Web Sockets change events receiver</p>
+        <h1>Web Sockets change events receiver</h1>
+        <p id="contents"></p>
     </body>
 </html>
