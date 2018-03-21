@@ -1,9 +1,8 @@
 # Prepare Kafka etc.
 
-- export DOCKER_HOST_NAME=`ipconfig getifaddr en0`
 - export DEBEZIUM_VERSION=0.7
 - docker ps -a
-- docker-compose up
+- docker-compose up --scale swarm=0
 
 # Prepare WF
 
@@ -32,7 +31,7 @@
 
 - docker stop tutorial_connect_1
 - Change some data
-- docker-compose up -d
+- docker-compose up -d connect
 - Show PG again as it catches up
 
 # Register source connector (JSON)
@@ -42,7 +41,8 @@
 
 # Start Swarm app
 
-- mvn wildfly-swarm:run -Dswarm.http.port=8079
+- mvn clean package -f debezium-swarm-demo/pom.xml
+- docker-compose up -d --build
 - Open in other browser: http://localhost:8079/
 # Misc.
 

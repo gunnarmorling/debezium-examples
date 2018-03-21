@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>WebSocket Client</title>
+ 
+        <script type="text/javascript">
+            var ws = new WebSocket("ws://localhost:8079/example");
+
+            ws.onopen = function() {
+                alert( "Web Socket is connected!" );
+            };
+
+            ws.onmessage = function (evt) {
+                var msg = evt.data;
+                alert( msg );
+            };
+
+            ws.onclose = function() { 
+                alert( "Connection is closed." ); 
+            };
+         </script>
+    </head>
+
+    <body>
+        <p>Web Sockets change events receiver</p>
+    </body>
+</html>

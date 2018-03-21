@@ -14,7 +14,6 @@ services:
      - zookeeper
     environment:
      - ZOOKEEPER_CONNECT=zookeeper:2181
-     - ADVERTISED_HOST_NAME=${DOCKER_HOST_NAME}
   mysql:
     image: debezium/example-mysql:${DEBEZIUM_VERSION}
     ports:
@@ -87,3 +86,18 @@ services:
      - GROUP_ID=2
      - CONFIG_STORAGE_TOPIC=my_connect_json_configs
      - OFFSET_STORAGE_TOPIC=my_connect_json_offsets
+  swarm:
+    image: debezium/swarm-example:${DEBEZIUM_VERSION}
+    build:
+      context: debezium-swarm-demo
+    links:
+     - kafka
+    ports:
+     - 8079:8079
+    environment:
+     - JAVA_APP_JAR=demo-swarm.jar
+     - JAVA_OPTIONS=-Dswarm.http.port=8079
+    command: >
+      /bin/bash -c "
+        java -jar /deployments/demo-swarm.jar -Djava.net.preferIPv4Stack=true -Dswarm.http.port=8079
+      "
