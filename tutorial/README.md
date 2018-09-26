@@ -1,6 +1,13 @@
 # Debezium Tutorial
 
-This demo automatically deploys the topology of services as defined in [Debezium Tutorial](http://debezium.io/docs/tutorial/) document.
+This demo automatically deploys the topology of services as defined in the [Debezium Tutorial](http://debezium.io/docs/tutorial/).
+
+* [Using MySQL](#using-mysql)
+  * [Using MySQL and the Avro message format](#using-mysql-and-the-avro-message-format)
+* [Using Postgres](#using-postgres)
+* [Using MongoDB](#using-mongodb)
+* [Using Oracle](#using-oracle)
+* [Using SQL Server](#using-sql-server)
 
 ## Using MySQL
 
@@ -24,6 +31,41 @@ docker-compose -f docker-compose-mysql.yaml exec mysql bash -c 'mysql -u $MYSQL_
 
 # Shut down the cluster
 docker-compose -f docker-compose-mysql.yaml down
+```
+
+### Using MySQL and the Avro message format
+
+To use [Avro-style messages](http://debezium.io/docs/configuration/avro/) instead of JSON,
+follow the instructions for MySQL above,
+but use the _docker-compose-mysql-avro.yaml_ configuration file instead.
+This Compose file configures the Connect service to use the Avro (de-)serializers and starts one more service,
+the Confluent schema registry.
+Using Avro on conjunction with the service registry allows for much more compact messages.
+
+You can access the first version of the schema for `customers` values like so:
+
+```shell
+curl -X GET http://localhost:8081/subjects/dbserver1.inventory.customers-value/versions/1
+```
+
+Or, if you have the `jq` utility installed, you can get a formatted output like this:
+
+```shell
+curl -X GET http://localhost:8081/subjects/dbserver1.inventory.customers-value/versions/1 | jq '.schema | fromjson'
+```
+
+If you alter the structure of the `customers` table in the database and trigger another change event,
+a new version of that schema will be available in the registry.
+
+The service registry also comes with a console consumer that can read the Avro messages:
+
+```shell
+docker-compose -f docker-compose-mysql-avro.yaml exec schema-registry /usr/bin/kafka-avro-console-consumer \
+    --bootstrap-server kafka:9092 \
+    --from-beginning \
+    --property print.key=true \
+    --property schema.registry.url=http://schema-registry:8081 \
+    --topic dbserver1.inventory.customers
 ```
 
 ## Using Postgres
@@ -112,7 +154,7 @@ curl -i -X POST -H "Accept:application/json" -H  "Content-Type:application/json"
 echo "INSERT INTO customers VALUES (NULL, 'John', 'Doe', 'john.doe@example.com');" | docker exec -i dbz_oracle sqlplus debezium/dbz@//localhost:1521/ORCLPDB1
 
 # Consume messages from a Debezium topic
-docker-compose -f docker-compose-postgres.yaml exec kafka /kafka/bin/kafka-console-consumer.sh \
+docker-compose -f docker-compose-oracle.yaml exec kafka /kafka/bin/kafka-console-consumer.sh \
     --bootstrap-server kafka:9092 \
     --from-beginning \
     --property print.key=true \
@@ -125,37 +167,29 @@ docker exec -i dbz_oracle sqlplus debezium/dbz@//localhost:1521/ORCLPDB1
 docker-compose -f docker-compose-oracle.yaml down
 ```
 
-## Using MySQL and the Avro message format
-
-To use [Avro-style messages](http://debezium.io/docs/configuration/avro/) instead of JSON,
-follow the instructions for MySQL above,
-but use the _docker-compose-mysql-avro.yaml_ configuration file instead.
-This Compose file configures the Connect service to use the Avro (de-)serializers and starts one more service,
-the Confluent schema registry.
-Using Avro on conjunction with the service registry allows for much more compact messages.
-
-You can access the first version of the schema for `customers` values like so:
+## Using SQL Server
 
 ```shell
-curl -X GET http://localhost:8081/subjects/dbserver1.inventory.customers-value/versions/1
-```
+# Start the topology as defined in http://debezium.io/docs/tutorial/
+export DEBEZIUM_VERSION=0.9
+docker-compose -f docker-compose-sqlserver.yaml up
 
-Or, if you have the `jq` utility installed, you can get a formatted output like this:
+# Initialize database and insert test data
+cat debezium-sqlserver-init/inventory.sql | docker exec -i tutorial_sqlserver_1 bash -c '/opt/mssql-tools/bin/sqlcmd -U sa -P $SA_PASSWORD'
 
-```shell
-curl -X GET http://localhost:8081/subjects/dbserver1.inventory.customers-value/versions/1 | jq '.schema | fromjson'
-```
+# Start SQL Server connector
+curl -i -X POST -H "Accept:application/json" -H  "Content-Type:application/json" http://localhost:8083/connectors/ -d @register-sqlserver.json
 
-If you alter the structure of the `customers` table in the database and trigger another change event,
-a new version of that schema will be available in the registry.
-
-The service registry also comes with a console consumer that can read the Avro messages:
-
-```shell
-docker-compose -f docker-compose-mysql-avro.yaml exec schema-registry /usr/bin/kafka-avro-console-consumer \
+# Consume messages from a Debezium topic
+docker-compose -f docker-compose-sqlserver.yaml exec kafka /kafka/bin/kafka-console-consumer.sh \
     --bootstrap-server kafka:9092 \
     --from-beginning \
     --property print.key=true \
-    --property schema.registry.url=http://schema-registry:8081 \
-    --topic dbserver1.inventory.customers
+    --topic server1.dbo.customers
+
+# Modify records in the database via SQL Server client (do not forget to add `GO` command to execute the statement)
+docker-compose -f docker-compose-sqlserver.yaml exec sqlserver bash -c '/opt/mssql-tools/bin/sqlcmd -U sa -P $SA_PASSWORD -d testDB'
+
+# Shut down the cluster
+docker-compose -f docker-compose-sqlserver.yaml down
 ```

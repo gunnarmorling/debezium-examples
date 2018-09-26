@@ -14,34 +14,21 @@ services:
      - zookeeper
     environment:
      - ZOOKEEPER_CONNECT=zookeeper:2181
-  mysql:
-    image: debezium/example-mysql:${DEBEZIUM_VERSION}
+  sqlserver:
+    image: microsoft/mssql-server-linux:2017-CU8
     ports:
-     - 3306:3306
+     - 1433:1433
     environment:
-     - MYSQL_ROOT_PASSWORD=debezium
-     - MYSQL_USER=mysqluser
-     - MYSQL_PASSWORD=mysqlpw
-  elastic:
-    image: docker.elastic.co/elasticsearch/elasticsearch:5.5.2
-    ports:
-     - "9200:9200"
-    environment:
-     - http.host=0.0.0.0
-     - transport.host=127.0.0.1
-     - xpack.security.enabled=false
-     - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+     - ACCEPT_EULA=Y
+     - MSSQL_PID=Standard
+     - SA_PASSWORD=Password!
   connect:
-    image: debezium/connect-jdbc-es:${DEBEZIUM_VERSION}
-    build:
-      context: debezium-jdbc-es
+    image: debezium/connect:${DEBEZIUM_VERSION}
     ports:
      - 8083:8083
-     - 5005:5005
     links:
      - kafka
-     - mysql
-     - elastic
+     - sqlserver
     environment:
      - BOOTSTRAP_SERVERS=kafka:9092
      - GROUP_ID=1
