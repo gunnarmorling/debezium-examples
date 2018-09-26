@@ -27,13 +27,18 @@ It does these things:
 - docker-compose exec schema-registry /usr/bin/kafka-avro-console-consumer --bootstrap-server kafka:9092 --from-beginning --property print.key=true --property schema.registry.url=http://schema-registry:8081 --topic dbserver1_inventory_Hike
 - http http://localhost:8081/subjects/dbserver1_inventory_Hike-value/versions/1 | jq '.schema | fromjson'
 
-## Register sink connector
+## Register JDBC sink connector
 
 - Back to slides - mention SMT
 
 - cat jdbc-sink.json | http POST http://localhost:8083/connectors/
 - http localhost:8083/connectors/
 - docker-compose exec postgres bash -c 'psql -U $POSTGRES_USER $POSTGRES_DB -c "select * from \"dbserver1_inventory_Hike\""'
+
+## Register Elasticsearch sink connector
+
+- cat es-sink.json | http POST http://localhost:8083/connectors/
+- http 'http://localhost:9200/hike/_search?pretty'
 
 ## Stop Kafka Connect
 
