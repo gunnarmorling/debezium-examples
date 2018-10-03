@@ -6,13 +6,13 @@
     <groupId>io.debezium.examples</groupId>
     <artifactId>kstreams-live-update-aggregator</artifactId>
     <version>0.1-SNAPSHOT</version>
-    <packaging>war</packaging>
+    <packaging>jar</packaging>
 
     <properties>
         <mvn.compiler.version>3.5.1</mvn.compiler.version>
         <mvn.dependency.version>3.0.2</mvn.dependency.version>
         <apache.kafka.version>2.0.0</apache.kafka.version>
-        <version.thorntail>2.2.0.Final</version.thorntail>
+        <version.thorntail>4.0.0-SNAPSHOT</version.thorntail>
         <version.org.slf4j>1.7.25</version.org.slf4j>
         <version.com.fasterxml.jackson>2.9.6</version.com.fasterxml.jackson>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -25,7 +25,7 @@
         <dependencies>
             <dependency>
                 <groupId>io.thorntail</groupId>
-                <artifactId>bom-all</artifactId>
+                <artifactId>thorntail-bom</artifactId>
                 <version>${version.thorntail}</version>
                 <scope>import</scope>
                 <type>pom</type>
@@ -34,6 +34,10 @@
     </dependencyManagement>
 
     <dependencies>
+        <dependency>
+            <groupId>io.thorntail</groupId>
+            <artifactId>thorntail-websockets</artifactId>
+        </dependency>
         <!-- Java EE 7 dependency -->
         <dependency>
             <groupId>javax</groupId>
@@ -86,6 +90,10 @@
                         <goals>
                             <goal>package</goal>
                         </goals>
+                        <configuration>
+                            <mode>thin</mode>
+                            <mainClass>io.debezium.examples.kstreams.liveupdate.aggregator.ws.Main</mainClass>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
@@ -97,26 +105,6 @@
                     <source>${java.version}</source>
                     <target>${java.version}</target>
                 </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <version>${mvn.dependency.version}</version>
-                <executions>
-                    <execution>
-                        <id>copy-dependencies</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>copy-dependencies</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${project.build.directory}/dependencies</outputDirectory>
-                            <overWriteReleases>false</overWriteReleases>
-                            <overWriteSnapshots>false</overWriteSnapshots>
-                            <overWriteIfNewer>true</overWriteIfNewer>
-                        </configuration>
-                    </execution>
-                </executions>
             </plugin>
         </plugins>
     </build>

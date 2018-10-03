@@ -65,7 +65,7 @@ services:
     environment:
      # - JAVA_MAIN_CLASS=io.debezium.examples.kstreams.liveupdate.aggregator.Main
      - JAVA_APP_JAR=demo-swarm.jar
-     - JAVA_OPTIONS=-Dswarm.http.port=8079
+     - "JAVA_OPTS=-Djava.net.preferIPv4Stack=true -Dweb.primary.port=8079"
     depends_on:
      - connect
     command: >
@@ -76,5 +76,5 @@ services:
           sleep 1;
         done;
         echo 'Source connector deployed!';
-        java -jar /deployments/demo-thorntail.jar -Djava.net.preferIPv4Stack=true -Dswarm.http.port=8079
+        /deployments/aggregator/demo-bin/bin/run.sh
       "
