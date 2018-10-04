@@ -3,10 +3,9 @@
  *
  * Licensed under the Apache Software License version 2.0, available at http://www.apache.org/licenses/LICENSE-2.0
  */
-package io.debezium.examples.kstreams.liveupdate.eventsource;
+package io.debezium.examples.graphql.eventsource;
 
 import java.time.ZonedDateTime;
-import java.util.List;
 import java.util.Random;
 
 import javax.persistence.EntityManager;
@@ -35,9 +34,8 @@ class EventSource {
             EntityManager entityManager = entityManagerFactory.createEntityManager();
 
             entityManager.getTransaction().begin();
-            List<Category> categories = entityManager.createQuery("from Category c", Category.class).getResultList();
             Object[] minMaxCustomerIds = (Object[]) entityManager.createNativeQuery("select min(id), max(id) from customers").getSingleResult();
-            Object[] minMaxProductIds = (Object[]) entityManager.createNativeQuery("select min(id), max(id) from products").getSingleResult();
+             Object[] minMaxProductIds = (Object[]) entityManager.createNativeQuery("select min(id), max(id) from products").getSingleResult();
 
             entityManager.getTransaction().commit();
 
@@ -47,7 +45,7 @@ class EventSource {
                     entityManager.getTransaction().begin();
                 }
 
-                entityManager.persist(getRandomOrder(entityManager, (int)minMaxCustomerIds[0], (int)minMaxCustomerIds[1], (int)minMaxProductIds[0], (int)minMaxProductIds[1], categories));
+                entityManager.persist(getRandomOrder(entityManager, (int)minMaxCustomerIds[0], (int)minMaxCustomerIds[1], (int)minMaxProductIds[0], (int)minMaxProductIds[1]));
 
                 i++;
                 try {
@@ -74,8 +72,7 @@ class EventSource {
         thread.start();
     }
 
-    private Order getRandomOrder(EntityManager entityManager, int minCustomerId, int maxCustomerId, int minProductId, int maxProductId, List<Category> categories) {
-        Category category = categories.get(random.nextInt(categories.size()));
+    private Order getRandomOrder(EntityManager entityManager, int minCustomerId, int maxCustomerId, int minProductId, int maxProductId) {
         int customerId = minCustomerId + random.nextInt(maxCustomerId - minCustomerId + 1);
         int productId = minProductId + random.nextInt(maxProductId - minProductId + 1);
         int quantity = random.nextInt(4) + 1;
@@ -84,10 +81,7 @@ class EventSource {
                 ZonedDateTime.now(),
                 customerId,
                 productId,
-                entityManager.getReference(Category.class, category.id),
-                quantity,
-                category.getRandomPrice()
-        );
+                quantity);
     }
 
     public void stop() {
