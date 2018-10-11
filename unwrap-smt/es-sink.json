@@ -3,12 +3,15 @@
     "config": {
         "connector.class": "io.confluent.connect.elasticsearch.ElasticsearchSinkConnector",
         "tasks.max": "1",
-        "topics": "customers",
+        "topics": "Customers",
         "connection.url": "http://elastic:9200",
-        "transforms": "unwrap,key",
+        "transforms": "unwrap,key,route",
         "transforms.unwrap.type": "io.debezium.transforms.UnwrapFromEnvelope",
         "transforms.key.type": "org.apache.kafka.connect.transforms.ExtractField$Key",
         "transforms.key.field": "id",
+        "transforms.route.type": "org.apache.kafka.connect.transforms.RegexRouter",
+        "transforms.route.regex": "Customers",
+        "transforms.route.replacement": "customers",
         "key.ignore": "false",
         "type.name": "customer"
     }
