@@ -22,12 +22,14 @@ oc patch kafka my-cluster --type merge -p '{ "spec" : { "zookeeper" : { "resourc
 
 # DB
 
-oc new-app https://github.com/gunnarmorling/debezium-examples.git#kstreams-demo --strategy=docker --name=mysql --context-dir=kstreams-live-update/example-db
-oc set env dc/mysql MYSQL_ROOT_PASSWORD=debezium MYSQL_USER=mysqluser MYSQL_PASSWORD=mysqlpw
+oc new-app https://github.com/gunnarmorling/debezium-examples.git#kstreams-demo --strategy=docker --name=mysql --context-dir=kstreams-live-update/example-db \
+    -e MYSQL_ROOT_PASSWORD=debezium \
+    -e MYSQL_USER=mysqluser \
+    -e MYSQL_PASSWORD=mysqlpw
 
 # Event Source
 
-oc new-app --name=event-source fabric8/s2i-java:latest~https://github.com/gunnarmorling/debezium-examples.git#kstreams-demo \
+oc new-app --name=event-source debezium/msa-lab-s2i:latest~https://github.com/gunnarmorling/debezium-examples.git#kstreams-demo \
     --context-dir=kstreams-live-update/event-source \
     -e JAVA_MAIN_CLASS=io.debezium.examples.kstreams.liveupdate.eventsource.Main
 
@@ -56,7 +58,7 @@ cd ..
 
 # Aggregator
 
-oc new-app --name=aggregator fabric8/s2i-java:latest~https://github.com/gunnarmorling/debezium-examples.git#kstreams-os \
+oc new-app --name=aggregator debezium/msa-lab-s2i:latest~https://github.com/gunnarmorling/debezium-examples.git#kstreams-os \
     --context-dir=kstreams-live-update/aggregator \
     -e AB_PROMETHEUS_OFF=true \
     -e KAFKA_BOOTSTRAP_SERVERS=my-cluster-kafka-bootstrap:9092 \
@@ -86,7 +88,7 @@ oc exec -c kafka -i my-cluster-kafka-0 -- curl -s -w "\n" -X POST \
         "database.port": "3306",
         "database.user": "debezium",
         "database.password": "dbz",
-        "database.server.id": "184054",
+        "database.server.id": "184055",
         "database.server.name": "dbserver1",
         "decimal.handling.mode" : "string",
         "table.whitelist": "inventory.orders,inventory.categories",
@@ -97,13 +99,13 @@ oc exec -c kafka -i my-cluster-kafka-0 -- curl -s -w "\n" -X POST \
 EOF
 ```
 
-oc exec -c kafka -it my-cluster-kafka-0 -- /opt/kafka/bin/kafka-console-consumer.sh \
+oc exec -c zookeeper -it my-cluster-zookeeper-0 -- /opt/kafka/bin/kafka-console-consumer.sh \
    --bootstrap-server my-cluster-kafka-bootstrap:9092 \
    --from-beginning \
    --property print.key=true \
    --topic dbserver1.inventory.categories
 
-oc exec -c kafka -it my-cluster-kafka-0 -- /opt/kafka/bin/kafka-console-consumer.sh \
+oc exec -c zookeeper -it my-cluster-zookeeper-0 -- /opt/kafka/bin/kafka-console-consumer.sh \
    --bootstrap-server my-cluster-kafka-bootstrap:9092 \
    --property print.key=true \
    --topic dbserver1.inventory.orders
@@ -122,7 +124,9 @@ oc exec -c kafka -i my-cluster-kafka-0 -- curl -s -w "\n" -X DELETE \
 
 oc logs $(oc get pods -o name -l strimzi.io/name=debezium-connect)
 
-oc exec -c kafka -it my-cluster-kafka-0 -- /opt/kafka/bin/kafka-console-consumer.sh \
+oc logs $(oc get pods -o name -l app=event-source)
+
+oc exec -c zookeeper -it my-cluster-zookeeper-0 -- /opt/kafka/bin/kafka-console-consumer.sh \
    --bootstrap-server my-cluster-kafka-bootstrap:9092 \
    --property print.key=true \
    --topic sales_per_category
