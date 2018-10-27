@@ -8,6 +8,7 @@ package io.debezium.examples.kstreams.liveupdate.eventsource;
 public class Main {
 
     private void run() {
+	    System.out.println("### hi ###");
         EventSource source = new EventSource();
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {

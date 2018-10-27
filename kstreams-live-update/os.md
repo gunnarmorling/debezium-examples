@@ -6,7 +6,7 @@ wget https://github.com/strimzi/strimzi/releases/download/0.8.0/strimzi-0.8.0.ta
 tar xzvf strimzi-0.8.0.tar.gz
 cd strimzi-0.8.0
 rm -rf plugins
-oc cluster up --routing-suffix=<YOUR SERVER IP>.nip.io
+oc cluster up --routing-suffix=`ifconfig eth0 | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1'`.nip.io
 oc login -u developer
 oc new-project voxxed-demo
 
@@ -64,13 +64,23 @@ oc new-app --name=aggregator debezium/msa-lab-s2i:latest~https://github.com/gunn
     -e KAFKA_BOOTSTRAP_SERVERS=my-cluster-kafka-bootstrap:9092 \
     -e JAVA_OPTIONS=-Djava.net.preferIPv4Stack=true
 
+oc patch dc/aggregator -p '[{"op": "add", "path": "/spec/template/spec/containers/0/ports/1", "value":{"containerPort":8080,"protocol":"TCP"}}]' --type=json
+
+
 oc patch service aggregator -p '{ "spec" : { "ports" : [{ "name" : "8080-tcp", "port" : 8080, "protocol" : "TCP", "targetPort" : 8080 }] } } }'
+
+oc patch deploymentconfig -p '{ "spec" : { "containers" : [ "name" : "aggregator", "env" : { "ports" : [{ "containerPort" : "8080", "protocol" : "TCP" }] } ] } } }'
 
 oc expose svc aggregator
 
 oc get routes aggregator -o=jsonpath='{.spec.host}{"\n"}'
 
 # Demo
+
+oc exec aggregator -- curl -s -w "\n" -X GET \
+    -H "Accept:application/json" \
+    -H "Content-Type:application/json" \
+    http://aggregator:8080/health
 
 oc exec -c kafka -i my-cluster-kafka-0 -- curl -s -w "\n" -X POST \
     -H "Accept:application/json" \
