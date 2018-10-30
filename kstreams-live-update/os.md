@@ -2,7 +2,9 @@
 
 (Tested with OpenShift OKD 3.11)
 
-cd strimzi-0.8.0-voxxed
+wget https://github.com/strimzi/strimzi/releases/download/0.8.0/strimzi-0.8.0.tar.gz
+tar xzvf strimzi-0.8.0.tar.gz
+cd strimzi-0.8.0
 rm -rf plugins
 oc cluster up --routing-suffix=<YOUR SERVER IP>.nip.io
 oc login -u developer
@@ -33,8 +35,6 @@ oc new-app --name=event-source debezium/msa-lab-s2i:latest~https://github.com/gu
     --context-dir=kstreams-live-update/event-source \
     -e JAVA_MAIN_CLASS=io.debezium.examples.kstreams.liveupdate.eventsource.Main
 
-oc patch bc/event-source -p '{"spec":{"strategy":{"sourceStrategy":{"incremental":true}}}}'
-
 # Debezium
 
 oc process strimzi-connect-s2i \
@@ -63,8 +63,6 @@ oc new-app --name=aggregator debezium/msa-lab-s2i:latest~https://github.com/gunn
     -e AB_PROMETHEUS_OFF=true \
     -e KAFKA_BOOTSTRAP_SERVERS=my-cluster-kafka-bootstrap:9092 \
     -e JAVA_OPTIONS=-Djava.net.preferIPv4Stack=true
-
-oc patch bc/aggregator -p '{"spec":{"strategy":{"sourceStrategy":{"incremental":true}}}}'
 
 oc patch service aggregator -p '{ "spec" : { "ports" : [{ "name" : "8080-tcp", "port" : 8080, "protocol" : "TCP", "targetPort" : 8080 }] } } }'
 
