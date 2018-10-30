@@ -58,7 +58,7 @@ cd ..
 
 # Aggregator
 
-oc new-app --name=aggregator debezium/msa-lab-s2i:latest~https://github.com/gunnarmorling/debezium-examples.git#kstreams-os \
+oc new-app --name=aggregator debezium/msa-lab-s2i:latest~https://github.com/gunnarmorling/debezium-examples.git#kstreams-demo \
     --context-dir=kstreams-live-update/aggregator \
     -e AB_PROMETHEUS_OFF=true \
     -e KAFKA_BOOTSTRAP_SERVERS=my-cluster-kafka-bootstrap:9092 \
