@@ -1,3 +1,8 @@
+/*
+ * Copyright Debezium Authors.
+ *
+ * Licensed under the Apache Software License version 2.0, available at http://www.apache.org/licenses/LICENSE-2.0
+ */
 package io.debezium.examples.kstreams.liveupdate.aggregator.health;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -6,7 +11,6 @@ import javax.inject.Inject;
 import org.eclipse.microprofile.health.Health;
 import org.eclipse.microprofile.health.HealthCheck;
 import org.eclipse.microprofile.health.HealthCheckResponse;
-import org.eclipse.microprofile.health.HealthCheckResponseBuilder;
 
 import io.debezium.examples.kstreams.liveupdate.aggregator.StreamsPipelineManager;
 import io.debezium.examples.kstreams.liveupdate.aggregator.cdi.Eager;
@@ -20,17 +24,9 @@ public class AggregatorStarted implements HealthCheck {
 
     @Override
     public HealthCheckResponse call() {
-        HealthCheckResponseBuilder responseBuilder = HealthCheckResponse.named("aggregator");
-
-        if (spm.isStarted()) {
-            responseBuilder.withData("pipeline started", true)
-                .up();
-        }
-        else {
-            responseBuilder.withData("pipeline started", false)
-                .down();
-        }
-
-        return responseBuilder.build();
+        return HealthCheckResponse.named("aggregator")
+                .withData("KStreams pipeline started", spm.isStarted())
+                .state(spm.isStarted())
+                .build();
     }
 }
