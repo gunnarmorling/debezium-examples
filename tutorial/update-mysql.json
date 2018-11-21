@@ -1,6 +1,4 @@
 {
-    "name": "inventory-connector",
-    "config": {
         "connector.class": "io.debezium.connector.mysql.MySqlConnector",
         "tasks.max": "1",
         "database.hostname": "mysql",
@@ -12,6 +10,6 @@
         "database.whitelist": "inventory",
         "database.history.kafka.bootstrap.servers": "kafka:9092",
         "database.history.kafka.topic": "schema-changes.inventory",
-        "table.whitelist" : ".*customers"
-    }
+        "table.whitelist" : ".*customers,.*orders",
+        "snapshot.new.tables" : "parallel"
 }

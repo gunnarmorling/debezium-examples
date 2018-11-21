@@ -26,6 +26,7 @@ services:
     image: debezium/connect:${DEBEZIUM_VERSION}
     ports:
      - 8083:8083
+     - 5005:5005
     links:
      - kafka
      - mysql
@@ -34,3 +35,5 @@ services:
      - GROUP_ID=1
      - CONFIG_STORAGE_TOPIC=my_connect_configs
      - OFFSET_STORAGE_TOPIC=my_connect_offsets
+     - KAFKA_DEBUG=true
+     - DEBUG_SUSPEND_FLAG=n
