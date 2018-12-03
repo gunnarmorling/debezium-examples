@@ -12,6 +12,7 @@
         "database.whitelist": "inventory",
         "database.history.kafka.bootstrap.servers": "kafka:9092",
         "database.history.kafka.topic": "schema-changes.inventory",
-        "table.whitelist" : ".*customers"
+        "table.whitelist" : ".*customers",
+        "snapshot.new.tables" : "parallel"
     }
 }
