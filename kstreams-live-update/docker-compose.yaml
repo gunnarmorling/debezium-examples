@@ -45,17 +45,17 @@ services:
      - OFFSET_STORAGE_TOPIC=my_source_connect_offsets
      - CONNECT_KEY_CONVERTER_SCHEMAS_ENABLE=false
      - CONNECT_VALUE_CONVERTER_SCHEMAS_ENABLE=false
-  event-source:
-    image: debezium/kstreams-live-update-event-source:${DEBEZIUM_VERSION}
-    build:
-      context: event-source
-    links:
-     - mysql
-    environment:
-     - JAVA_MAIN_CLASS=io.debezium.examples.kstreams.liveupdate.eventsource.Main
-    depends_on:
-      mysql:
-        condition: service_healthy
+  # event-source:
+  #   image: debezium/kstreams-live-update-event-source:${DEBEZIUM_VERSION}
+  #   build:
+  #     context: event-source
+  #   links:
+  #    - mysql
+  #   environment:
+  #    - JAVA_MAIN_CLASS=io.debezium.examples.kstreams.liveupdate.eventsource.Main
+  #   depends_on:
+  #     mysql:
+  #       condition: service_healthy
   aggregator:
     image: debezium/kstreams-aggregator:${DEBEZIUM_VERSION}
     build:
@@ -65,12 +65,13 @@ services:
     links:
      - kafka
     environment:
-     - JAVA_APP_JAR=demo-thorntail.jar
-     - "JAVA_OPTIONS=-Djava.net.preferIPv4Stack=true -Dswarm.http.port=8079"
-     - AB_PROMETHEUS_OFF=true
+     - JAVA_MAIN_CLASS=io.debezium.examples.kstreams.liveupdate.aggregator.Main
+     #- JAVA_APP_JAR=demo-thorntail.jar
+     #- "JAVA_OPTIONS=-Djava.net.preferIPv4Stack=true -Dswarm.http.port=8079"
+     #- AB_PROMETHEUS_OFF=true
     depends_on:
      - connect
-    command: >
-      /bin/bash -c "
-        java -jar /deployments/demo-thorntail.jar -Djava.net.preferIPv4Stack=true -Dswarm.http.port=8079
-      "
+    #command: >
+    #  /bin/bash -c "
+    #    java -jar /deployments/demo-thorntail.jar -Djava.net.preferIPv4Stack=true -Dswarm.http.port=8079
+    #  "
