@@ -32,3 +32,35 @@ CREATE TABLE orders (
 ALTER TABLE orders ADD CONSTRAINT fk_orders_product_id FOREIGN KEY (product_id) REFERENCES inventory.products(id);
 ALTER TABLE orders ADD CONSTRAINT fk_orders_purchaser_id FOREIGN KEY (purchaser_id) REFERENCES inventory.customers(id);
 ALTER TABLE orders ADD CONSTRAINT fk_orders_category_id FOREIGN KEY (category_id) REFERENCES inventory.categories(id);
+
+CREATE TABLE rules (
+  id BIGINT NOT NULL AUTO_INCREMENT,
+  description VARCHAR(255) NOT NULL,
+  PRIMARY KEY (id)
+) AUTO_INCREMENT = 101;
+
+CREATE TABLE systems (
+  id BIGINT NOT NULL AUTO_INCREMENT,
+  name VARCHAR(255) NOT NULL,
+  PRIMARY KEY (id)
+) AUTO_INCREMENT = 1001;
+
+CREATE TABLE reports (
+  id BIGINT NOT NULL AUTO_INCREMENT,
+  rule_id BIGINT NOT NULL,
+  system_id BIGINT NOT NULL,
+  PRIMARY KEY (id)
+) AUTO_INCREMENT = 10001;
+
+ALTER TABLE reports ADD CONSTRAINT fk_reports_rule_id FOREIGN KEY (rule_id) REFERENCES inventory.rules(id);
+ALTER TABLE reports ADD CONSTRAINT fk_reports_system_id FOREIGN KEY (system_id) REFERENCES inventory.systems(id);
+
+INSERT INTO rules VALUES (default, 'Something is wrong 1');
+INSERT INTO rules VALUES (default, 'Something is wrong 2');
+
+INSERT INTO systems VALUES (default, 'System A');
+INSERT INTO systems VALUES (default, 'System B');
+
+INSERT INTO reports VALUES (default, 101, 1001);
+INSERT INTO reports VALUES (default, 102, 1001);
+INSERT INTO reports VALUES (default, 101, 1002);
