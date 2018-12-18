@@ -23,7 +23,9 @@ services:
      - MYSQL_USER=mysqluser
      - MYSQL_PASSWORD=mysqlpw
   connect:
-    image: debezium/connect:${DEBEZIUM_VERSION}
+    image: debezium/connect-debug-logging:${DEBEZIUM_VERSION}
+    build:
+      context: debezium-debug-logging
     ports:
      - 8083:8083
      - 5005:5005
