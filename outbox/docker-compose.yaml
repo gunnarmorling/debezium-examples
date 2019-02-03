@@ -77,8 +77,8 @@ services:
      #- "JAVA_OPTIONS=-Djava.net.preferIPv4Stack=true -Dswarm.http.port=8079"
      #- AB_JOLOKIA_OFF=true
      #- AB_OFF=true
-     #- KAFKA_SERVICE_HOST=kafka
-     #- KAFKA_SERVICE_PORT=9092
+     - KAFKA_SERVICE_HOST=kafka
+     - KAFKA_SERVICE_PORT=9092
      - BOOTSTRAP_SERVERS=kafka:9092
      - ORDER_TOPIC_NAME=Order
     depends_on:
