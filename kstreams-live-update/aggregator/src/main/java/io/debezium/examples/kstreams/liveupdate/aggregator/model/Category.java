@@ -7,6 +7,9 @@ package io.debezium.examples.kstreams.liveupdate.aggregator.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import io.quarkus.runtime.annotations.RegisterForReflection;
+
+@RegisterForReflection
 public class Category {
 
     public long id;

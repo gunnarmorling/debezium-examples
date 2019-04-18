@@ -25,7 +25,7 @@ Build data generator application and aggregator application:
 
 ```shell
 mvn clean install -f event-source/pom.xml
-mvn clean install -f aggregator/pom.xml
+mvn clean install -f aggregator/pom.xml -Pnative -Dnative-image.container-runtime=docker
 ```
 
 Start Kafka, Kafka Connect, MySQL, event source and aggregator:

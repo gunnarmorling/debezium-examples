@@ -5,6 +5,9 @@
  */
 package io.debezium.examples.kstreams.liveupdate.aggregator.model;
 
+import io.quarkus.runtime.annotations.RegisterForReflection;
+
+@RegisterForReflection
 public class ValueAggregator {
 
     public long count;
