@@ -1,8 +1,12 @@
 package io.debezium.rsvp.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.json.bind.annotation.JsonbProperty;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.ManyToMany;
 
 @Entity
 public class Member {
@@ -15,6 +19,9 @@ public class Member {
 
     @JsonbProperty("member_name")
     public String name;
+
+    @ManyToMany
+    public List<Group> groups = new ArrayList<>();
 
     @Override
     public String toString() {

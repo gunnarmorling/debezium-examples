@@ -20,6 +20,7 @@ import org.xnio.XnioWorker;
 import io.debezium.rsvp.model.Event;
 import io.debezium.rsvp.model.Group;
 import io.debezium.rsvp.model.Member;
+import io.debezium.rsvp.model.PersistentRsvp;
 import io.debezium.rsvp.model.Rsvp;
 import io.debezium.rsvp.model.Venue;
 import io.quarkus.runtime.ShutdownEvent;
@@ -69,51 +70,70 @@ public class MeetupImporter {
                 Rsvp rsvp = jsonb.fromJson(data, Rsvp.class);
                 System.out.println(rsvp);
 
+                Group group = rsvp.group;
+                Venue venue = rsvp.venue;
+                Member member = rsvp.member;
+                Event event = rsvp.event;
+
                 EntityManager em = emf.createEntityManager();
                 em.getTransaction().begin();
 
-                if (rsvp.venue != null) {
-                    if (em.find(Venue.class, rsvp.venue.id) != null) {
-                        em.merge(rsvp.venue);
+                if (venue != null) {
+                    if (em.find(Venue.class, venue.id) != null) {
+                        venue = em.merge(venue);
                     }
                     else {
-                        em.persist(rsvp.venue);
+                        em.persist(venue);
                     }
                 }
 
-                if (rsvp.member != null) {
-                    if (em.find(Member.class, rsvp.member.id) != null) {
-                        em.merge(rsvp.member);
-                    }
-                    else {
-                        em.persist(rsvp.member);
-                    }
-                }
-
-                if (rsvp.event != null) {
-                    if (em.find(Event.class, rsvp.event.id) != null) {
-                        em.merge(rsvp.event);
-                    }
-                    else {
-                        em.persist(rsvp.event);
-                    }
-                }
-
-                if (rsvp.group != null) {
-                    if (em.find(Group.class, rsvp.group.id) != null) {
-                        em.merge(rsvp.group);
-                    }
-                    else {
-                        em.persist(rsvp.group);
-                    }
-                }
-
-                Rsvp existing = em.find(Rsvp.class, rsvp.rsvpId);
-                if (existing != null) {
-                    em.merge(rsvp);
+                if (em.find(Member.class, member.id) != null) {
+                    member = em.merge(member);
+                    member.groups.add(group);
                 }
                 else {
-                    em.persist(rsvp);
+                    member.groups.add(group);
+                    em.persist(member);
+                }
+
+                if (em.find(Group.class, group.id) != null) {
+                    group = em.merge(group);
+                    group.members.add(member);
+                }
+                else {
+                    group.members.add(member);
+                    em.persist(group);
+                }
+
+                if (em.find(Event.class, event.id) != null) {
+                    event = em.merge(event);
+                    group.events.add(event);
+                    event.group = group;
+                    event.venue = venue;
+                }
+                else {
+                    group.events.add(event);
+                    event.group = group;
+                    event.venue = venue;
+                    em.persist(event);
+                }
+
+System.out.println("#### event: " + event);
+                PersistentRsvp persistentRsvp = new PersistentRsvp();
+                persistentRsvp.id = rsvp.id;
+                persistentRsvp.guests = rsvp.guests;
+                persistentRsvp.mtime = rsvp.mtime;
+                persistentRsvp.visibility = rsvp.visibility;
+                persistentRsvp.response = rsvp.response;
+                persistentRsvp.member = rsvp.member;
+                persistentRsvp.event = rsvp.event;
+
+                PersistentRsvp existing = em.find(PersistentRsvp.class, persistentRsvp.id);
+                if (existing != null) {
+                    em.merge(persistentRsvp);
+                }
+                else {
+                    em.persist(persistentRsvp);
                 }
 
                 em.getTransaction().commit();

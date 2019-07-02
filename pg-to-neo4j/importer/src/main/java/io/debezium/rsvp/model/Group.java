@@ -1,12 +1,17 @@
 package io.debezium.rsvp.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.json.bind.annotation.JsonbProperty;
+import javax.persistence.CollectionTable;
 import javax.persistence.ElementCollection;
 import javax.persistence.Embeddable;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToMany;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 @Entity
@@ -39,8 +44,18 @@ public class Group {
     public String state;
 
     @ElementCollection
+    @CollectionTable(
+        name = "Group_Topic",
+        joinColumns=@JoinColumn(name = "group_id")
+    )
     @JsonbProperty("group_topics")
     public List<GroupTopic> topics;
+
+    @ManyToMany(mappedBy="groups")
+    public List<Member> members = new ArrayList<>();
+
+    @OneToMany(mappedBy="group")
+    public List<Event> events = new ArrayList<>();
 
     @Override
     public String toString() {

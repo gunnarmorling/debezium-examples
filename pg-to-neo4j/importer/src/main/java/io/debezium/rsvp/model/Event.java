@@ -6,6 +6,7 @@ import javax.json.bind.annotation.JsonbProperty;
 import javax.json.bind.annotation.JsonbTypeAdapter;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 
 @Entity
 public class Event {
@@ -23,8 +24,15 @@ public class Event {
     @JsonbProperty("event_url")
     public String url;
 
+    @ManyToOne(optional=false)
+    public Group group;
+
+    @ManyToOne
+    public Venue venue;
+
     @Override
     public String toString() {
-        return "Event [id=" + id + ", time=" + time + ", name=" + name + ", url=" + url + "]";
+        return "Event [id=" + id + ", time=" + time + ", name=" + name + ", url=" + url + ", group=" + group
+                + ", venue=" + venue + "]";
     }
 }

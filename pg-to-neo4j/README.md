@@ -34,3 +34,11 @@ docker-compose exec kafka /kafka/bin/kafka-console-consumer.sh \
     --property print.key=true \
     --topic dbserver1.rsvp.rsvp
 ```
+
+Using kafkacat and pgcli:
+
+```
+docker run --tty --rm -i --network pg-to-neo4j_default debezium/tooling:1.0
+stdbuf -o0 kafkacat -b kafka:9092 -t dbserver1.rsvp.rsvp -C -o beginning | jq ."payload"
+pgcli postgresql://postgresuser:postgrespw@postgres:5432/rsvpdb
+```
