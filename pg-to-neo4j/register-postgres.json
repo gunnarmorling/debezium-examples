@@ -1,0 +1,14 @@
+{
+    "name": "rsvp-connector",
+    "config": {
+        "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
+        "tasks.max": "1",
+        "database.hostname": "postgres",
+        "database.port": "5432",
+        "database.user": "postgresuser",
+        "database.password": "postgrespw",
+        "database.dbname" : "rsvpdb",
+        "database.server.name": "dbserver1",
+        "schema.whitelist": "rsvp"
+    }
+}
