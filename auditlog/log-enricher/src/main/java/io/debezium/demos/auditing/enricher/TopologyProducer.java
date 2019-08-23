@@ -34,41 +34,60 @@ public class TopologyProducer {
             // .filter((id, changeEvent) -> changeEvent != null)
 
             // re-key by transaction id; store original id in message value so we can restore it later on
-            .map((id, changeEvent) -> KeyValue.pair(
-                Json.createObjectBuilder()
-                    .add("transaction_id", changeEvent.asJsonObject()
-                        .get("source")
-                        .asJsonObject()
-                        .getJsonNumber("txId")
-                        .longValue())
-                        .build(),
-                Json.createObjectBuilder()
-                    .add("id", id)
-                    .add("changeEvent", changeEvent)
-                    .build())
-            )
+            .map((id, changeEvent) -> {
+                if (changeEvent == null) {
+                    return KeyValue.pair(
+                        Json.createObjectBuilder()
+                            .add("transaction_id", -1)
+                            .build(),
+                        Json.createObjectBuilder()
+                            .add("id", id)
+                            .build());
+                }
+                else {
+                    return KeyValue.pair(
+                        Json.createObjectBuilder()
+                            .add("transaction_id", changeEvent.asJsonObject()
+                                .get("source")
+                                .asJsonObject()
+                                .getJsonNumber("txId")
+                                .longValue())
+                                .build(),
+                        Json.createObjectBuilder()
+                            .add("id", id)
+                            .add("changeEvent", changeEvent)
+                            .build());
+                }
+            })
             // join metadata topic on TX id; add metadata into change events
-            .join(
+            .leftJoin(
                 transactionContextData,
-                (idAndChangeEvent, txData) ->
-                    Json.createObjectBuilder(idAndChangeEvent)
-                        .add(
-                            "changeEvent",
-                            Json.createObjectBuilder(idAndChangeEvent.get("changeEvent").asJsonObject())
-                                .add("audit", Json.createObjectBuilder(
-                                    txData.get("after")
-                                        .asJsonObject())
-                                        .remove("transaction_id")
-                                        .build()
-                                )
-                                .build())
-                        .build()
+                (idAndChangeEvent, txData) -> {
+                    if (txData == null) {
+                        return idAndChangeEvent;
+                    }
+                    else {
+                        return Json.createObjectBuilder(idAndChangeEvent)
+                            .add(
+                                "changeEvent",
+                                Json.createObjectBuilder(idAndChangeEvent.get("changeEvent").asJsonObject())
+                                    .add("audit", Json.createObjectBuilder(
+                                        txData.get("after")
+                                            .asJsonObject())
+                                            .remove("transaction_id")
+                                            .build()
+                                    )
+                                    .build())
+                            .build();
+                    }
+                }
+
             )
             // re-key by original PK; get rid of the temporary id + change event wrapper
             .map((id, idAndChangeEvent) ->
                 KeyValue.pair(
                     idAndChangeEvent.get("id").asJsonObject(),
-                    idAndChangeEvent.get("changeEvent").asJsonObject()
+                    idAndChangeEvent.containsKey("changeEvent") ? idAndChangeEvent.get("changeEvent").asJsonObject() : null
                 )
             )
             .to(vegetablesEnrichedTopic);
