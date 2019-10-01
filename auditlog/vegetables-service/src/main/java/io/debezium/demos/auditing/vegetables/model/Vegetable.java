@@ -1,5 +1,6 @@
 package io.debezium.demos.auditing.vegetables.model;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -12,6 +13,7 @@ public class Vegetable {
     private Long id;
     private String name;
     private String description;
+    private String review;
 
     @Id
     @SequenceGenerator(
@@ -42,5 +44,14 @@ public class Vegetable {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    @Column(columnDefinition="TEXT")
+    public String getReview() {
+        return review;
+    }
+
+    public void setReview(String review) {
+        this.review = review;
     }
 }
