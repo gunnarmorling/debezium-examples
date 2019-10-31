@@ -50,7 +50,6 @@ services:
     image: debezium/connect:${DEBEZIUM_VERSION}
     ports:
      - 8083:8083
-     - 5005:5005
     links:
      - kafka
      - order-db
@@ -75,40 +74,18 @@ services:
     links:
      - kafka
      - order-db
-  shipment-service:
-    image: debezium-example/outbox-shipment-service:${DEBEZIUM_VERSION}
-    build:
-      context: shipment-service
-    ports:
-     - 8079:8079
-    links:
-     - kafka
-     - shipment-db
+     - schema-registry
     environment:
-     #- JAVA_APP_JAR=shipment-thorntail.jar
-     #- "JAVA_OPTIONS=-Djava.net.preferIPv4Stack=true -Dswarm.http.port=8079"
-     #- AB_JOLOKIA_OFF=true
-     #- AB_OFF=true
-     #- KAFKA_SERVICE_HOST=kafka
-     #- KAFKA_SERVICE_PORT=9092
-     - BOOTSTRAP_SERVERS=kafka:9092
-     - ORDER_TOPIC_NAME=order.events
-    depends_on:
-     - connect
-    command: >
-      /bin/bash -c "
-        java -jar /deployments/shipment-thorntail.jar -Djava.net.preferIPv4Stack=true -Dswarm.http.port=8079
-      "
-  shipment-service-quarkus:
-    image: debezium-example/outbox-shipment-service-quarkus:${DEBEZIUM_VERSION}
-    build:
-      context: shipment-service-quarkus
+     - SCHEMA_REGISTRY_URL=http://schema-registry:8081
+     - 5005:5005
+  schema-registry:
+    image: confluentinc/cp-schema-registry
+    ports:
+     - 8181:8181
+     - 8081:8081
+    environment:
+     - SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL=zookeeper:2181
+     - SCHEMA_REGISTRY_HOST_NAME=schema-registry
+     - SCHEMA_REGISTRY_LISTENERS=http://schema-registry:8081
     links:
-     - kafka
-     - shipment-db-quarkus
-    depends_on:
-     shipment-db-quarkus:
-        condition: service_healthy
-     connect:
-        condition: service_started
-    command: "/deployments/application -Dquarkus.datasource.url=jdbc:mariadb://shipment-db-quarkus:3306/shipmentdb"
+     - zookeeper

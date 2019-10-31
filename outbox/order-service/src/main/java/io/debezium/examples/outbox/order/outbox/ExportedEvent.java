@@ -5,7 +5,7 @@
  */
 package io.debezium.examples.outbox.order.outbox;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import org.apache.avro.generic.GenericContainer;
 
 /**
  * Describes an event which should exported via the "outbox" table.
@@ -29,7 +29,7 @@ public interface ExportedEvent {
     /**
      * The actual event payload.
      */
-    JsonNode getPayload();
+    GenericContainer getPayload();
 
     /**
      * The type of an event, e.g. "Order Created", "Order Line Canceled" for events of the "order" aggregate type.

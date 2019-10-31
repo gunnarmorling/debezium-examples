@@ -5,36 +5,44 @@
  */
 package io.debezium.examples.outbox.order.event;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.Date;
+
+import org.apache.avro.Schema;
+import org.apache.avro.SchemaBuilder;
+import org.apache.avro.generic.GenericContainer;
+import org.apache.avro.generic.GenericData;
+import org.apache.avro.generic.GenericRecord;
 
 import io.debezium.examples.outbox.order.model.PurchaseOrder;
 import io.debezium.examples.outbox.order.outbox.ExportedEvent;
 
-import java.util.Date;
-
 public class InvoiceCreatedEvent implements ExportedEvent {
 
-    private static ObjectMapper mapper = new ObjectMapper();
-
     private final long customerId;
-    private final JsonNode order;
+    private final GenericContainer order;
     private final Long timestamp;
 
-    private InvoiceCreatedEvent(long customerId, JsonNode order) {
+    private InvoiceCreatedEvent(long customerId, GenericContainer order) {
         this.customerId = customerId;
         this.order = order;
         this.timestamp = (new Date()).getTime();
     }
 
     public static InvoiceCreatedEvent of(PurchaseOrder order) {
-        ObjectNode asJson = mapper.createObjectNode()
-                .put("orderId", order.getId())
-                .put("invoiceDate", order.getOrderDate().toString())
-                .put("invoiceValue", order.getTotalValue());
+        Schema schema = SchemaBuilder.record("InvoiceCreated")
+                .namespace("io.debezium.examples.outbox.order")
+                .fields()
+                .requiredLong("orderId")
+                .requiredString("invoiceDate")
+                .requiredLong("invoiceValue")
+                .endRecord();
 
-        return new InvoiceCreatedEvent(order.getCustomerId(), asJson);
+        GenericRecord entry = new GenericData.Record(schema);
+        entry.put("orderId", order.getId());
+        entry.put("invoiceDate", order.getOrderDate().toString());
+        entry.put("invoiceValue", order.getTotalValue().longValue());
+
+        return new InvoiceCreatedEvent(order.getCustomerId(), entry);
     }
 
     @Override
@@ -58,7 +66,7 @@ public class InvoiceCreatedEvent implements ExportedEvent {
     }
 
     @Override
-    public JsonNode getPayload() {
+    public GenericContainer getPayload() {
         return order;
     }
 }

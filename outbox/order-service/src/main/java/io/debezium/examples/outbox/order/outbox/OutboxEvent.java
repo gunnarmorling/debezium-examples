@@ -7,16 +7,14 @@ package io.debezium.examples.outbox.order.outbox;
 
 import java.util.UUID;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.Lob;
 import javax.validation.constraints.NotNull;
 
-import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.vladmihalcea.hibernate.type.json.JsonNodeBinaryType;
 
 @TypeDef(name = "jsonb", typeClass = JsonNodeBinaryType.class)
@@ -39,15 +37,14 @@ public class OutboxEvent {
     @NotNull
     private Long timestamp;
 
-    @Type(type = "jsonb")
-    @Column(columnDefinition = "jsonb")
     @NotNull
-    private JsonNode payload;
+    @Lob
+    private byte[] payload;
 
     OutboxEvent() {
     }
 
-    public OutboxEvent(String aggregateType, String aggregateId, String type, JsonNode payload, Long timestamp) {
+    public OutboxEvent(String aggregateType, String aggregateId, String type, byte[] payload, Long timestamp) {
         this.aggregateType = aggregateType;
         this.aggregateId = aggregateId;
         this.type = type;
@@ -95,11 +92,11 @@ public class OutboxEvent {
         this.timestamp = timestamp;
     }
 
-    public JsonNode getPayload() {
+    public byte[] getPayload() {
         return payload;
     }
 
-    public void setPayload(JsonNode payload) {
+    public void setPayload(byte[] payload) {
         this.payload = payload;
     }
 }

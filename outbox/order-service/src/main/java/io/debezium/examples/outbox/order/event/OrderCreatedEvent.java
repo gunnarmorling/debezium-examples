@@ -5,51 +5,92 @@
  */
 package io.debezium.examples.outbox.order.event;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
-import io.debezium.examples.outbox.order.model.OrderLine;
+import org.apache.avro.Schema;
+import org.apache.avro.SchemaBuilder;
+import org.apache.avro.generic.GenericContainer;
+import org.apache.avro.generic.GenericData;
+import org.apache.avro.generic.GenericRecord;
+
+import io.confluent.kafka.serializers.KafkaAvroSerializer;
 import io.debezium.examples.outbox.order.model.PurchaseOrder;
 import io.debezium.examples.outbox.order.outbox.ExportedEvent;
 
-import java.util.Date;
-
 public class OrderCreatedEvent implements ExportedEvent {
 
-    private static ObjectMapper mapper = new ObjectMapper();
-
     private final long id;
-    private final JsonNode order;
+    private final GenericContainer order;
     private final Long timestamp;
 
-    private OrderCreatedEvent(long id, JsonNode order) {
+    private OrderCreatedEvent(long id, GenericContainer order) {
         this.id = id;
         this.order = order;
         this.timestamp = (new Date()).getTime();
     }
 
+    public static void main(String[] args) {
+        PurchaseOrder order = new PurchaseOrder(1L, LocalDateTime.now(), Collections.emptyList());
+        order.setId(2L);
+        Schema schema = SchemaBuilder.record("PurchaseOrder")
+                .namespace("io.debezium.examples.outbox.order")
+                .fields()
+                .requiredLong("id")
+                .requiredLong("customerId")
+                .requiredString("orderDate")
+                .endRecord();
+
+        GenericRecord entry = new GenericData.Record(schema);
+        entry.put("id", order.getId());
+        entry.put("customerId", order.getCustomerId());
+        entry.put("orderDate", order.getOrderDate().toString());
+
+        KafkaAvroSerializer serializer = new KafkaAvroSerializer();
+        Map<String, String> configs = new HashMap<>();
+        configs.put("schema.registry.url", "http://localhost:8081");
+        serializer.configure(configs, false);
+
+        byte[] s = serializer.serialize("", entry);
+        System.out.println(s);
+    }
+
     public static OrderCreatedEvent of(PurchaseOrder order) {
-        ObjectNode asJson = mapper.createObjectNode()
-                .put("id", order.getId())
-                .put("customerId", order.getCustomerId())
-                .put("orderDate", order.getOrderDate().toString());
+        Schema schema = SchemaBuilder.record("PurchaseOrder")
+                .namespace("io.debezium.examples.outbox.order")
+                .fields()
+                .requiredLong("id")
+                .requiredLong("customerId")
+                .requiredString("orderDate")
+                .endRecord();
 
-        ArrayNode items = asJson.putArray("lineItems");
+        GenericRecord entry = new GenericData.Record(schema);
+        entry.put("id", order.getId());
+        entry.put("customerId", order.getCustomerId());
+        entry.put("orderDate", order.getOrderDate().toString());
 
-        for (OrderLine orderLine : order.getLineItems()) {
-        items.add(
-                mapper.createObjectNode()
-                .put("id", orderLine.getId())
-                .put("item", orderLine.getItem())
-                .put("quantity", orderLine.getQuantity())
-                .put("totalPrice", orderLine.getTotalPrice())
-                .put("status", orderLine.getStatus().name())
-            );
-        }
+//        ObjectNode asJson = mapper.createObjectNode()
+//                .put("id", order.getId())
+//                .put("customerId", order.getCustomerId())
+//                .put("orderDate", order.getOrderDate().toString());
+//
+//        ArrayNode items = asJson.putArray("lineItems");
+//
+//        for (OrderLine orderLine : order.getLineItems()) {
+//        items.add(
+//                mapper.createObjectNode()
+//                .put("id", orderLine.getId())
+//                .put("item", orderLine.getItem())
+//                .put("quantity", orderLine.getQuantity())
+//                .put("totalPrice", orderLine.getTotalPrice())
+//                .put("status", orderLine.getStatus().name())
+//            );
+//        }
 
-        return new OrderCreatedEvent(order.getId(), asJson);
+        return new OrderCreatedEvent(order.getId(), entry);
     }
 
     @Override
@@ -73,7 +114,7 @@ public class OrderCreatedEvent implements ExportedEvent {
     }
 
     @Override
-    public JsonNode getPayload() {
+    public GenericContainer getPayload() {
         return order;
     }
 }

@@ -5,13 +5,14 @@
  */
 package io.debezium.examples.outbox.order.event;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import java.util.Date;
+
+import org.apache.avro.generic.GenericContainer;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.debezium.examples.outbox.order.model.OrderLineStatus;
 import io.debezium.examples.outbox.order.outbox.ExportedEvent;
-
-import java.util.Date;
 
 public class OrderLineUpdatedEvent implements ExportedEvent {
 
@@ -68,12 +69,8 @@ public class OrderLineUpdatedEvent implements ExportedEvent {
     }
 
     @Override
-    public JsonNode getPayload() {
-        return mapper.createObjectNode()
-                .put("orderId", orderId)
-                .put("orderLineId", orderLineId)
-                .put("oldStatus", oldStatus.name())
-                .put("newStatus", newStatus.name());
+    public GenericContainer getPayload() {
+        throw new UnsupportedOperationException();
     }
 
     @Override
