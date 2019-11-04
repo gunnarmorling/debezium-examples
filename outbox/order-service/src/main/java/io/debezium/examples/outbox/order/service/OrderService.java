@@ -12,7 +12,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
 
-import io.debezium.examples.outbox.order.event.InvoiceCreatedEvent;
 import io.debezium.examples.outbox.order.event.OrderCreatedEvent;
 import io.debezium.examples.outbox.order.event.OrderLineUpdatedEvent;
 import io.debezium.examples.outbox.order.model.EntityNotFoundException;
@@ -34,7 +33,7 @@ public class OrderService {
         order = entityManager.merge(order);
 
         event.fire(OrderCreatedEvent.of(order));
-        event.fire(InvoiceCreatedEvent.of(order));
+//        event.fire(InvoiceCreatedEvent.of(order));
 
         return order;
     }

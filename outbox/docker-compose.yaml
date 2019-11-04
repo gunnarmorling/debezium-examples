@@ -24,32 +24,11 @@ services:
      - POSTGRES_USER=postgresuser
      - POSTGRES_PASSWORD=postgrespw
      - POSTGRES_DB=orderdb
-  shipment-db:
-    image: debezium/example-mysql:${DEBEZIUM_VERSION}
-    ports:
-     - 3306:3306
-    environment:
-     - MYSQL_ROOT_PASSWORD=debezium
-     - MYSQL_USER=mysqluser
-     - MYSQL_PASSWORD=mysqlpw
-  shipment-db-quarkus:
-    image: mariadb/server
-    ports:
-     - "33306:3306"
-    healthcheck:
-      test: "/usr/bin/mysql -h shipment-db-quarkus --user=mariadbuser --password=mariadbpw --execute \"SELECT 1;\" shipmentdb"
-      interval: 2s
-      timeout: 20s
-      retries: 10
-    environment:
-     - MARIADB_USER=mariadbuser
-     - MARIADB_PASSWORD=mariadbpw
-     - MARIADB_DATABASE=shipmentdb
-     - MARIADB_RANDOM_ROOT_PASSWORD=true
   connect:
     image: debezium/connect:${DEBEZIUM_VERSION}
     ports:
      - 8083:8083
+     - 5005:5005
     links:
      - kafka
      - order-db
@@ -60,7 +39,7 @@ services:
      - OFFSET_STORAGE_TOPIC=my_source_connect_offsets
      - STATUS_STORAGE_TOPIC=my_source_connect_statuses
      - CONNECT_KEY_CONVERTER_SCHEMAS_ENABLE=false
-     - CONNECT_VALUE_CONVERTER_SCHEMAS_ENABLE=false
+     - INTERNAL_VALUE_CONVERTER=org.apache.kafka.connect.json.JsonConverter
      - KAFKA_DEBUG=true
      - DEBUG_SUSPEND_FLAG=n
   order-service:
@@ -77,7 +56,6 @@ services:
      - schema-registry
     environment:
      - SCHEMA_REGISTRY_URL=http://schema-registry:8081
-     - 5005:5005
   schema-registry:
     image: confluentinc/cp-schema-registry
     ports:

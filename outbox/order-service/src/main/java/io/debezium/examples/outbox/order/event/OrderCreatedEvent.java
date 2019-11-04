@@ -36,7 +36,7 @@ public class OrderCreatedEvent implements ExportedEvent {
     public static void main(String[] args) {
         PurchaseOrder order = new PurchaseOrder(1L, LocalDateTime.now(), Collections.emptyList());
         order.setId(2L);
-        Schema schema = SchemaBuilder.record("PurchaseOrder")
+        Schema schema = SchemaBuilder.record("OrderCreatedEvent")
                 .namespace("io.debezium.examples.outbox.order")
                 .fields()
                 .requiredLong("id")
@@ -59,7 +59,7 @@ public class OrderCreatedEvent implements ExportedEvent {
     }
 
     public static OrderCreatedEvent of(PurchaseOrder order) {
-        Schema schema = SchemaBuilder.record("PurchaseOrder")
+        Schema schema = SchemaBuilder.record("OrderCreated")
                 .namespace("io.debezium.examples.outbox.order")
                 .fields()
                 .requiredLong("id")

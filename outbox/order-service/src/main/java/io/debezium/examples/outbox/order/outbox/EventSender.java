@@ -44,7 +44,7 @@ public class EventSender {
                 event.getAggregateType(),
                 event.getAggregateId(),
                 event.getType(),
-                serializer.serialize("", event.getPayload()),
+                serializer.serialize(event.getAggregateType(), event.getPayload()),
                 event.getTimestamp()
         );
 
@@ -52,6 +52,6 @@ public class EventSender {
         // So the events table will always be empty, but still both events will be captured from
         // the log by Debezium (and the latter will be ignored)
         entityManager.persist(outboxEvent);
-        entityManager.remove(outboxEvent);
+//        entityManager.remove(outboxEvent);
     }
 }
