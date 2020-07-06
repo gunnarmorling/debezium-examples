@@ -1,0 +1,12 @@
+{
+    "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
+    "tasks.max": "1",
+    "database.hostname": "members-db",
+    "database.port": "5432",
+    "database.user": "postgresuser",
+    "database.password": "postgrespw",
+    "database.dbname" : "membersdb",
+    "database.server.name": "dbserver1",
+    "table.whitelist": "inventory.member,inventory.address",
+    "provide.transaction.metadata" : "true"
+}

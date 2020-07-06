@@ -1,0 +1,12 @@
+{
+    "name" : "Bob Jones",
+    "birthday" : "1980-08-21",
+    "addresses" : [
+        {
+            "street" : "23 Main Street",
+            "city" : "Savannah",
+            "zip" : "90210",
+            "country" : "Canada"
+        }
+    ]
+}
