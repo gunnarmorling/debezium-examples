@@ -1,0 +1,105 @@
+version: '2'
+services:
+  zookeeper-1:
+    image: debezium/zookeeper:${DEBEZIUM_VERSION}
+    ports:
+     - 12181:2181
+     - 12888:2888
+     - 13888:3888
+    environment:
+     - SERVER_ID=1
+     - SERVER_COUNT=3
+    links:
+     - zookeeper-2
+     - zookeeper-3
+  zookeeper-2:
+    image: debezium/zookeeper:${DEBEZIUM_VERSION}
+    ports:
+      - 22181:2181
+      - 22888:2888
+      - 23888:3888
+    environment:
+      - SERVER_ID=2
+      - SERVER_COUNT=3
+  zookeeper-3:
+    image: debezium/zookeeper:${DEBEZIUM_VERSION}
+    ports:
+      - 32181:2181
+      - 32888:2888
+      - 33888:3888
+    environment:
+      - SERVER_ID=3
+      - SERVER_COUNT=3
+  kafka-1:
+    image: debezium/zkless-kafka:${DEBEZIUM_VERSION}
+    ports:
+     - 19092:9092
+     - 19093:9093
+     - 9012:9012
+    links:
+      - zookeeper-1
+      - zookeeper-2
+      - zookeeper-3
+    environment:
+     - ZOOKEEPER_CONNECT=zookeeper-1:2181,zookeeper-2:2181,zookeeper-3:2181
+     # - CLUSTER_ID=oh-sxaDRTcyAr6pFRbXyzA
+     - BROKER_ID=1
+     # - KAFKA_CONTROLLER_QUORUM_VOTERS=1@kafka-1:9093,2@kafka-2:9093,3@kafka-3:9093
+     - JMXPORT=9012
+     - JMXHOST=0.0.0.0
+  kafka-2:
+    image: debezium/zkless-kafka:${DEBEZIUM_VERSION}
+    ports:
+      - 29092:9092
+      - 29093:9093
+      - 9013:9013
+    links:
+      - zookeeper-1
+      - zookeeper-2
+      - zookeeper-3
+    environment:
+      - ZOOKEEPER_CONNECT=zookeeper-1:2181,zookeeper-2:2181,zookeeper-3:2181
+      # - CLUSTER_ID=oh-sxaDRTcyAr6pFRbXyzA
+      - BROKER_ID=2
+      # - KAFKA_CONTROLLER_QUORUM_VOTERS=1@kafka-1:9093,2@kafka-2:9093,3@kafka-3:9093
+      - JMXPORT=9013
+      - JMXHOST=0.0.0.0
+  kafka-3:
+    image: debezium/zkless-kafka:${DEBEZIUM_VERSION}
+    ports:
+      - 39092:9092
+      - 39093:9093
+      - 9014:9014
+    links:
+      - zookeeper-1
+      - zookeeper-2
+      - zookeeper-3
+    environment:
+      - ZOOKEEPER_CONNECT=zookeeper-1:2181,zookeeper-2:2181,zookeeper-3:2181
+      # - CLUSTER_ID=oh-sxaDRTcyAr6pFRbXyzA
+      - BROKER_ID=3
+      # - KAFKA_CONTROLLER_QUORUM_VOTERS=1@kafka-1:9093,2@kafka-2:9093,3@kafka-3:9093
+      - JMXPORT=9014
+      - JMXHOST=0.0.0.0
+  postgres:
+    image: debezium/example-postgres:${DEBEZIUM_VERSION}
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+  connect:
+    image: debezium/connect:${DEBEZIUM_VERSION}
+    ports:
+      - 8083:8083
+    links:
+      - kafka-1
+      - kafka-2
+      - kafka-3
+      - postgres
+    environment:
+      - BOOTSTRAP_SERVERS=kafka-1:9092
+      - GROUP_ID=1
+      - CONFIG_STORAGE_TOPIC=my_connect_configs
+      - OFFSET_STORAGE_TOPIC=my_connect_offsets
+      - STATUS_STORAGE_TOPIC=my_connect_statuses
