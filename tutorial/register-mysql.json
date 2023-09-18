@@ -11,6 +11,9 @@
         "topic.prefix": "dbserver1",
         "database.include.list": "inventory",
         "schema.history.internal.kafka.bootstrap.servers": "kafka:9092",
-        "schema.history.internal.kafka.topic": "schema-changes.inventory"
+        "schema.history.internal.kafka.topic": "schema-changes.inventory",
+        "signal.data.collection" : "inventory.debezium_signal",
+        "notification.enabled.channels" : "log",
+        "table.include.list" : "inventory.customers,inventory.products"
     }
 }
